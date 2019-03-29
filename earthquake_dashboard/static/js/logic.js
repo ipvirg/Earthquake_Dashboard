@@ -1,3 +1,4 @@
+// Set variable to contain URL links
 var earthquakeURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 var faultlinesURL = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
@@ -25,6 +26,7 @@ function createFeatures(earthquakeData) {
 	createMap(earthquakes);
 }
 
+// Function to display map
 function createMap(earthquakes) {
     var outdoors = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/outdoors-v10/tiles/256/{z}/{x}/{y}?access_token={accessToken}",{
         accessToken:API_KEY
@@ -34,16 +36,12 @@ function createMap(earthquakes) {
         accessToken:API_KEY
       });
 
-    // var darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}",{
-		// 		accessToken: API_KEY
 		var grayscale = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}",{
 				accessToken: API_KEY
     });
 
     var baseMaps = {
-    	// "Outdoors": outdoors,
     	"Satellite": satellite,
-			// "Dark Map": darkmap, 
 			"Grayscale": grayscale,
 			"Outdoors": outdoors,
     };
@@ -75,32 +73,31 @@ function createMap(earthquakes) {
 
 var legend = L.control({position: 'bottomright'});
 legend.onAdd = function(myMap){
-      var div = L.DomUtil.create('div', 'info legend')
-      var limits = [0, 1, 2, 3, 4, 5]
-      var labels = []
-
-    div.innerHTML = `<div class="labels"><div class="min">${limits[0]}</div>\
-      <div class="max">${limits[limits.length - 1]}+</div></div>`
-
-    limits.forEach(function (limit, index) {
-      labels.push(`<li style="background-color: ${getColor(index+1)}"></li>`)
-    })
-
-    div.innerHTML += '<ul>' + labels.join('') + '</ul>'
-    return div
-  }
+    var div = L.DomUtil.create('div', 'info legend')
+     	magnitudes = [0, 1, 2, 3, 4, 5]
+      labels = [];
+	
+		// loop through our density intervals and generate a label with a colored square for each interval
+		for (var i = 0; i < magnitudes.length; i++) {
+			div.innerHTML +=
+			'<i style="background:' + getColor(magnitudes[i] + 1) + '"></i> ' +
+			magnitudes[i] + (magnitudes[i + 1] ? '&ndash;' + magnitudes[i + 1] + '<br>' : '+');
+		}
+    return div;
+	
+	};
 
   legend.addTo(myMap);
 }
 
-
+//Create function to fill legend colors
 function getColor(d){
   return d > 5 ? "#ff0000":
-  d  > 4 ? "#ff6600":
-  d > 3 ? "#ffa500":
-  d > 2 ? "#ffb37e":
-  d > 1 ? "#ffff66":
-           "#90ee90";
+  			 d > 4 ? "#ff6600":
+  			 d > 3 ? "#ffa500":
+  			 d > 2 ? "#ffb37e":
+  			 d > 1 ? "#ffff66":
+         			  "#90ee90";
 }
 
 function getRadius(value){
